@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gravel Plan v4</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#0b0f14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gravel Plan">
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121821;
+      --card:#0f141c;
+      --border:#213043;
+      --ink:#e6eef9;
+      --muted:#9fb3cc;
+      --accent:#2cc56f;
+      --accent2:#1ba85d;
+      --danger:#ff8a8a;
+      --shadow:0 10px 30px rgba(0,0,0,.28);
+      --radius:18px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;background:linear-gradient(180deg,#0b0f14,#0d131b 30%,#0b0f14);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif}
+    body{padding:calc(14px + var(--safe-top)) 14px calc(18px + var(--safe-bottom));max-width:760px;margin:0 auto}
+    h1,h2,h3,p{margin:0}
+    .app-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .logo{width:56px;height:56px;border-radius:16px;box-shadow:var(--shadow)}
+    .title-wrap h1{font-size:24px;line-height:1.05;letter-spacing:.2px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:4px}
+    .stack{display:grid;gap:14px}
+    .card{
+      background:rgba(18,24,33,.95);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow)
+    }
+    .card h2{font-size:18px;margin-bottom:12px}
+    .mini{font-size:12px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:640px){.grid{grid-template-columns:1fr}}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input,select{
+      width:100%;
+      background:#0c121a;
+      color:var(--ink);
+      border:1px solid #2a3a4f;
+      border-radius:14px;
+      padding:14px 14px;
+      font-size:16px;
+      outline:none;
+      min-height:50px;
+    }
+    input:focus,select:focus{border-color:#4f6f97;box-shadow:0 0 0 4px rgba(79,111,151,.18)}
+    .row{display:grid;gap:12px}
+    .toggle{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:#0c121a;border:1px solid #2a3a4f;border-radius:14px;padding:12px 14px;
+      min-height:52px;
+    }
+    .toggle input{width:22px;height:22px;min-height:auto;padding:0}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .actions.single{grid-template-columns:1fr}
+    button{
+      appearance:none;border:none;border-radius:16px;min-height:54px;padding:14px 16px;
+      font-size:16px;font-weight:700;cursor:pointer
+    }
+    .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#08210f}
+    .btn-secondary{background:#172230;color:var(--ink);border:1px solid var(--border)}
+    .btn-ghost{background:transparent;color:var(--ink);border:1px dashed #35506e}
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:520px){.result-grid{grid-template-columns:1fr}}
+    .stat{
+      background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px
+    }
+    .stat .k{font-size:12px;color:var(--muted);margin-bottom:5px}
+    .stat .v{font-size:22px;font-weight:800;line-height:1.1}
+    .stat .s{font-size:12px;color:var(--muted);margin-top:4px}
+    .checklist{display:grid;gap:10px}
+    .check{
+      display:flex;gap:10px;align-items:flex-start;background:var(--card);
+      border:1px solid var(--border);border-radius:14px;padding:12px
+    }
+    .check input{width:22px;height:22px;min-height:auto;flex:0 0 auto;margin-top:1px}
+    .timer-wrap{display:grid;gap:10px}
+    .timer{
+      text-align:center;font-size:42px;font-weight:800;letter-spacing:1px;
+      background:#0c121a;border:1px solid var(--border);border-radius:18px;padding:18px 12px
+    }
+    .timer-note{font-size:13px;color:var(--muted);text-align:center}
+    .pill-row{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{
+      background:#102032;border:1px solid #23415f;color:#bfd4ef;border-radius:999px;
+      padding:8px 10px;font-size:12px
+    }
+    .warn{color:var(--danger)}
+    .footer{padding:4px 2px 12px;color:var(--muted);font-size:12px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <img src="icon-192.png" alt="Gravel Icon" class="logo">
+    <div class="title-wrap">
+      <h1>Gravel Plan v4</h1>
+      <div class="subtitle">iPhone-optimierter Ernährungs- & Trinkplan</div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h2>Tour</h2>
+      <div class="grid">
+        <div>
+          <label for="distance">Distanz (km)</label>
+          <input id="distance" type="number" value="130" min="10" step="5" inputmode="decimal">
+        </div>
+        <div>
+          <label for="speed">Ø Geschwindigkeit (km/h)</label>
+          <input id="speed" type="number" value="20" min="8" max="45" step="0.5" inputmode="decimal">
+        </div>
+        <div>
+          <label for="drinkPerHour">Trinken (ml/h)</label>
+          <input id="drinkPerHour" type="number" value="650" min="300" max="1200" step="10" inputmode="numeric">
+        </div>
+        <div>
+          <label for="carbsPerHour">Kohlenhydrate (g/h)</label>
+          <input id="carbsPerHour" type="number" value="70" min="30" max="120" step="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="sodiumPerHour">Natrium (mg/h)</label>
+          <input id="sodiumPerHour" type="number" value="550" min="200" max="1500" step="25" inputmode="numeric">
+        </div>
+        <div>
+          <label for="bottleMl">Flaschengröße (ml)</label>
+          <input id="bottleMl" type="number" value="800" min="500" max="1000" step="50" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label for="ratio">Fruktose : Maltodextrin</label>
+          <select id="ratio">
+            <option value="1:1">1:1</option>
+            <option value="1:2" selected>1:2</option>
+            <option value="1:3">1:3</option>
+          </select>
+        </div>
+        <div class="toggle">
+          <div>
+            <div>2. Flasche = Wasser</div>
+            <div class="mini">Drink-Anteil ca. 50 %</div>
+          </div>
+          <input id="waterSecond" type="checkbox" checked>
+        </div>
+        <div class="toggle">
+          <div>
+            <div>Hitze-Modus</div>
+            <div class="mini">erhöht Trink- und Natriumziel</div>
+          </div>
+          <input id="hotMode" type="checkbox">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="preset130">130 km</button>
+        <button class="btn-secondary" id="preset200">200 km</button>
+        <button class="btn-secondary" id="suggestBtn">Empfehlungen</button>
+        <button class="btn-primary" id="calcBtn">Plan berechnen</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Ergebnis</h2>
+      <div class="result-grid">
+        <div class="stat"><div class="k">Dauer</div><div class="v" id="durationOut">–</div><div class="s">Distanz ÷ Geschwindigkeit</div></div>
+        <div class="stat"><div class="k">Gesamt trinken</div><div class="v" id="totalDrinkOut">–</div><div class="s">über die ganze Tour</div></div>
+        <div class="stat"><div class="k">Gesamt KH</div><div class="v" id="totalCarbsOut">–</div><div class="s">Ziel über Drink / Food</div></div>
+        <div class="stat"><div class="k">Gesamt Natrium</div><div class="v" id="totalSodiumOut">–</div><div class="s">als Zielwert</div></div>
+        <div class="stat"><div class="k">Drink je Flasche</div><div class="v" id="recipeCarbsOut">–</div><div class="s" id="recipeSplitOut">–</div></div>
+        <div class="stat"><div class="k">Salz je Flasche</div><div class="v" id="recipeSaltOut">–</div><div class="s" id="refillOut">–</div></div>
+      </div>
+      <div class="pill-row" style="margin-top:12px">
+        <div class="pill" id="waterSplitOut">–</div>
+        <div class="pill" id="bottleCountOut">–</div>
+        <div class="pill" id="snackOut">–</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>15-Minuten Trink-Reminder</h2>
+      <div class="timer-wrap">
+        <div class="timer" id="timerDisplay">15:00</div>
+        <div class="timer-note">Nutzt Vibration, wenn verfügbar. Der Timer startet immer neu bei 15 Minuten.</div>
+        <div class="actions">
+          <button class="btn-primary" id="startTimerBtn">Timer starten</button>
+          <button class="btn-secondary" id="stopTimerBtn">Timer stoppen</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Flaschen-Counter</h2>
+      <div class="result-grid">
+        <div class="stat"><div class="k">Getrunkene Flaschen</div><div class="v" id="bottlesDrunkOut">0</div><div class="s">manuell mitzählen</div></div>
+        <div class="stat"><div class="k">Rest laut Plan</div><div class="v" id="bottlesLeftOut">–</div><div class="s">gerundet</div></div>
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button class="btn-primary" id="addBottleBtn">+ 1 Flasche</button>
+        <button class="btn-secondary" id="resetBottleBtn">Counter zurücksetzen</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Kompakte Checkliste</h2>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <div class="footer">Speichert alles lokal auf dem Gerät.</div>
+  </div>
+
+<script>
+const SODIUM_PER_GRAM_SALT = 393;
+const STORAGE_KEY = 'gravel_plan_v4_state';
+const CHECK_KEY = 'gravel_plan_v4_checks';
+
+const checklistItems = [
+  'Flasche 1: Drink gemischt',
+  'Flasche 2: Wasser / Drink',
+  'Pulver-Portionen zum Nachfüllen',
+  'Reserve-Riegel / Datteln / Banane',
+  'Multitool + Pumpe / CO₂',
+  'Ersatzschlauch / Tubeless-Plugs',
+  'Front- und Rücklicht',
+  'Handy + Offline-Karte + Powerbank',
+  'EC-Karte / Bargeld / Ausweis',
+  'Regenjacke / Weste / Sonnencreme'
+];
+
+function $(id){ return document.getElementById(id); }
+
+function ratioParts(){
+  const [f,m] = $('ratio').value.split(':').map(Number);
+  const sum = f + m;
+  return { fructose: f/sum, malto: m/sum, label: $('ratio').value };
+}
+
+function applySuggestions(){
+  if($('hotMode').checked){
+    $('drinkPerHour').value = 800;
+    $('carbsPerHour').value = 75;
+    $('sodiumPerHour').value = 850;
+  } else {
+    $('drinkPerHour').value = 650;
+    $('carbsPerHour').value = 70;
+    $('sodiumPerHour').value = 550;
+  }
+  compute();
+}
+
+function compute(){
+  const distance = parseFloat($('distance').value || 0);
+  const speed = parseFloat($('speed').value || 0);
+  const drinkPerHour = parseFloat($('drinkPerHour').value || 0);
+  const carbsPerHour = parseFloat($('carbsPerHour').value || 0);
+  const sodiumPerHour = parseFloat($('sodiumPerHour').value || 0);
+  const bottleMl = parseFloat($('bottleMl').value || 0);
+  const waterSecond = $('waterSecond').checked;
+  const duration = distance > 0 && speed > 0 ? distance / speed : 0;
+  const totalDrink = Math.round(duration * drinkPerHour);
+  const totalCarbs = Math.round(duration * carbsPerHour);
+  const totalSodium = Math.round(duration * sodiumPerHour);
+
+  const drinkShare = waterSecond ? 0.5 : 1.0;
+  const drinkMlPerHour = Math.round(drinkPerHour * drinkShare);
+  const waterMlPerHour = Math.max(0, drinkPerHour - drinkMlPerHour);
+  const drinkBottlesPerHour = bottleMl > 0 ? (drinkMlPerHour / bottleMl) : 0;
+
+  const carbsPerBottle = drinkBottlesPerHour > 0 ? (carbsPerHour / drinkBottlesPerHour) : 0;
+  const sodiumPerBottle = drinkBottlesPerHour > 0 ? (sodiumPerHour / drinkBottlesPerHour) : 0;
+  const saltPerBottle = sodiumPerBottle / SODIUM_PER_GRAM_SALT;
+
+  const ratio = ratioParts();
+  const fructoseG = Math.round(carbsPerBottle * ratio.fructose);
+  const maltoG = Math.round(carbsPerBottle * ratio.malto);
+
+  const totalBottles = bottleMl > 0 ? Math.ceil(totalDrink / bottleMl) : 0;
+  const refillCount = Math.max(0, totalBottles - 2);
+  const snackCount = Math.max(1, Math.round(duration * 0.8));
+
+  $('durationOut').textContent = duration ? duration.toFixed(1) + ' h' : '–';
+  $('totalDrinkOut').textContent = totalDrink ? totalDrink + ' ml' : '–';
+  $('totalCarbsOut').textContent = totalCarbs ? totalCarbs + ' g' : '–';
+  $('totalSodiumOut').textContent = totalSodium ? totalSodium + ' mg' : '–';
+  $('recipeCarbsOut').textContent = Math.round(carbsPerBottle) + ' g';
+  $('recipeSplitOut').textContent = fructoseG + ' g Fruktose + ' + maltoG + ' g Malto';
+  $('recipeSaltOut').textContent = saltPerBottle.toFixed(1) + ' g';
+  $('refillOut').textContent = '≈ ' + Math.round(sodiumPerBottle) + ' mg Na pro Flasche';
+  $('waterSplitOut').textContent = 'Drink ' + drinkMlPerHour + ' ml/h · Wasser ' + waterMlPerHour + ' ml/h';
+  $('bottleCountOut').textContent = 'ca. ' + totalBottles + ' Flaschen gesamt';
+  $('snackOut').textContent = snackCount + ' kleine Snack-Portionen';
+
+  const bottlesDrunk = parseInt(localStorage.getItem('gravel_plan_v4_bottles') || '0', 10);
+  $('bottlesDrunkOut').textContent = String(bottlesDrunk);
+  $('bottlesLeftOut').textContent = Math.max(0, totalBottles - bottlesDrunk);
+
+  persistState();
+}
+
+function persistState(){
+  const state = {
+    distance: $('distance').value,
+    speed: $('speed').value,
+    drinkPerHour: $('drinkPerHour').value,
+    carbsPerHour: $('carbsPerHour').value,
+    sodiumPerHour: $('sodiumPerHour').value,
+    bottleMl: $('bottleMl').value,
+    ratio: $('ratio').value,
+    waterSecond: $('waterSecond').checked,
+    hotMode: $('hotMode').checked
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function restoreState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const state = JSON.parse(raw);
+    Object.keys(state).forEach(k => {
+      if($(k)){
+        if(typeof state[k] === 'boolean') $(k).checked = state[k];
+        else $(k).value = state[k];
+      }
+    });
+  } catch(e){}
+}
+
+function buildChecklist(){
+  const host = $('checklist');
+  host.innerHTML = '';
+  let checks = {};
+  try{ checks = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }catch(e){}
+  checklistItems.forEach((item, i) => {
+    const row = document.createElement('label');
+    row.className = 'check';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!checks[i];
+    cb.addEventListener('change', () => {
+      checks[i] = cb.checked;
+      localStorage.setItem(CHECK_KEY, JSON.stringify(checks));
+    });
+    const text = document.createElement('div');
+    text.textContent = item;
+    row.appendChild(cb);
+    row.appendChild(text);
+    host.appendChild(row);
+  });
+}
+
+let timerInterval = null;
+let timerRemaining = 900;
+
+function renderTimer(){
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  $('timerDisplay').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function buzz(){
+  if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+
+function startTimer(){
+  stopTimer();
+  timerRemaining = parseInt(localStorage.getItem('gravel_plan_v4_timer_remaining') || '900', 10);
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    if(timerRemaining <= 0){
+      buzz();
+      alert('Trinken!');
+      timerRemaining = 900;
+    }
+    localStorage.setItem('gravel_plan_v4_timer_remaining', String(timerRemaining));
+    renderTimer();
+  }, 1000);
+}
+
+function stopTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function addBottle(){
+  const n = parseInt(localStorage.getItem('gravel_plan_v4_bottles') || '0', 10) + 1;
+  localStorage.setItem('gravel_plan_v4_bottles', String(n));
+  compute();
+}
+
+function resetBottle(){
+  localStorage.setItem('gravel_plan_v4_bottles', '0');
+  compute();
+}
+
+['distance','speed','drinkPerHour','carbsPerHour','sodiumPerHour','bottleMl','ratio'].forEach(id => {
+  $(id).addEventListener('input', compute);
+});
+$('waterSecond').addEventListener('change', compute);
+$('hotMode').addEventListener('change', applySuggestions);
+$('suggestBtn').addEventListener('click', applySuggestions);
+$('calcBtn').addEventListener('click', compute);
+$('preset130').addEventListener('click', () => { $('distance').value = 130; compute(); });
+$('preset200').addEventListener('click', () => { $('distance').value = 200; compute(); });
+$('startTimerBtn').addEventListener('click', startTimer);
+$('stopTimerBtn').addEventListener('click', stopTimer);
+$('addBottleBtn').addEventListener('click', addBottle);
+$('resetBottleBtn').addEventListener('click', resetBottle);
+
+restoreState();
+buildChecklist();
+renderTimer();
+if(!localStorage.getItem(STORAGE_KEY)) applySuggestions(); else compute();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body>
+</html>
